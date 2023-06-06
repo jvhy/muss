@@ -66,15 +66,14 @@ def get_mbart_download_url(language):
 
 
 def get_access_preprocessors_kwargs(language, use_short_name=False):
+    """
+    Modified to use Length Ratio + Levenshtein + FKGL
+    """
+
     return {
         'LengthRatioPreprocessor': {'target_ratio': 0.8, 'use_short_name': use_short_name},
         'ReplaceOnlyLevenshteinPreprocessor': {'target_ratio': 0.8, 'use_short_name': use_short_name},
-        'WordRankRatioPreprocessor': {'target_ratio': 0.8, 'language': language, 'use_short_name': use_short_name},
-        'DependencyTreeDepthRatioPreprocessor': {
-            'target_ratio': 0.8,
-            'language': language,
-            'use_short_name': use_short_name,
-        },
+        'FKGLPreprocessor': {'target_ratio': 0.8, 'use_short_name': use_short_name},
     }
 
 

@@ -21,6 +21,8 @@ from muss.feature_extraction import (
     get_levenshtein_similarity,
     get_dependency_tree_depth,
     get_replace_only_levenshtein_similarity,
+    get_fkgl,
+    get_dcrs,
 )
 from muss.resources.paths import VARIOUS_DIR, RESOURCES_DIR
 from muss.utils.resources import download
@@ -302,6 +304,44 @@ class ReplaceOnlyLevenshteinPreprocessor(LevenshteinPreprocessor):
         return get_replace_only_levenshtein_similarity(complex_sentence, simple_sentence)
 
 
+class FKGLPreprocessor(FeaturePreprocessor):
+    @store_args
+    def __init__(self, target_score=4, bucket_size=0.5, noise_std=0, **kwargs):
+        self.target_score = target_score
+        super().__init__(
+            self.prefix.upper(), self.get_feature_value, self.get_target_feature_value, bucket_size, noise_std, **kwargs
+        )
+
+    @staticmethod
+    def get_nevergrad_variables():
+        return {'target_score': ng.p.Scalar(init=4, lower=1, upper=12)}
+
+    def get_feature_value(self, simple_sentence):
+        return get_fkgl(simple_sentence)
+
+    def get_target_feature_value(self, complex_sentence):
+        return self.target_score
+
+
+class DCRSPreprocessor(FeaturePreprocessor):
+    @store_args
+    def __init__(self, target_score=4, bucket_size=0.5, noise_std=0, **kwargs):
+        self.target_score = target_score
+        super().__init__(
+            self.prefix.upper(), self.get_feature_value, self.get_target_feature_value, bucket_size, noise_std, **kwargs
+        )
+
+    @staticmethod
+    def get_nevergrad_variables():
+        return {'target_score': ng.p.Scalar(init=4, lower=1, upper=12)}
+
+    def get_feature_value(self, simple_sentence):
+        return get_dcrs(simple_sentence)
+
+    def get_target_feature_value(self, complex_sentence):
+        return self.target_score
+
+
 class RatioPreprocessor(FeaturePreprocessor):
     @store_args
     def __init__(self, feature_extractor, target_ratio=0.8, bucket_size=0.05, noise_std=0, **kwargs):
@@ -340,6 +380,18 @@ class DependencyTreeDepthRatioPreprocessor(RatioPreprocessor):
     @store_args
     def __init__(self, *args, language='en', **kwargs):
         super().__init__(lambda sentence: get_dependency_tree_depth(sentence, language=language), *args, **kwargs)
+
+
+class FKGLRatioPreprocessor(RatioPreprocessor):
+    @store_args
+    def __init__(self, *args, **kwargs):
+        super().__init__(lambda sentence: get_fkgl(sentence), *args, **kwargs)
+
+
+class DCRSRatioPreprocessor(RatioPreprocessor):
+    @store_args
+    def __init__(self, *args, **kwargs):
+        super().__init__(lambda sentence: get_dcrs(sentence), *args, **kwargs)
 
 
 def train_sentencepiece(input_filepaths, vocab_size, sentencepiece_model_path, num_threads=64, max_lines=10**7):

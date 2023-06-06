@@ -8,6 +8,7 @@ from functools import lru_cache
 
 import Levenshtein
 import numpy as np
+from textstat import flesch_kincaid_grade, dale_chall_readability_score
 
 from muss.resources.paths import get_fasttext_embeddings_path
 from muss.text import spacy_process, get_content_words
@@ -89,3 +90,14 @@ def get_dependency_tree_depth(sentence, language='en'):
     if len(tree_depths) == 0:
         return 0
     return max(tree_depths)
+
+
+def get_fkgl(sentence):
+    """Returns the Flesch-Kincaid Grade Level of the input sentence."""
+    return flesch_kincaid_grade(sentence)
+
+
+def get_dcrs(sentence):
+    """Returns the Dale-Chall Readability Score of the input sentence."""
+    return dale_chall_readability_score(sentence)
+

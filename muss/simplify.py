@@ -22,6 +22,10 @@ TOKENS_RATIO_DEFAULT = {
     "ReplaceOnlyLevenshteinPreprocessor": 0.8,
     "WordRankRatioPreprocessor": 0.8,
     "DependencyTreeDepthRatioPreprocessor": 0.4,
+    "FKGLPreprocessor": 4,
+    "FKGLRatioPreprocessor": 0.8,
+    "DCRSPreprocessor": 4,
+    "DCRSRatioPreprocessor": 0.8,
 }
 
 TOKENS_RATIO_EF1 = {
@@ -29,6 +33,10 @@ TOKENS_RATIO_EF1 = {
     "ReplaceOnlyLevenshteinPreprocessor": 0.5,
     "WordRankRatioPreprocessor": 0.4,
     "DependencyTreeDepthRatioPreprocessor": 0.2,
+    "FKGLPreprocessor": 2,
+    "FKGLRatioPreprocessor": 0.1,
+    "DCRSPreprocessor": 2,
+    "DCRSRatioPreprocessor": 0.1,
 }
 
 TOKENS_RATIO = TOKENS_RATIO_DEFAULT
@@ -60,6 +68,11 @@ def get_language_from_model_name(model_name):
 
 
 def get_muss_preprocessors(model_name):
+    """
+    Modified to Flesch-Kincaid Grade Level as a control attribute.
+    WordRank and Dependency Tree Depth Ratio omitted.
+    """
+
     language = get_language_from_model_name(model_name)
     preprocessors_kwargs = {
         'LengthRatioPreprocessor': {'target_ratio': TOKENS_RATIO["LengthRatioPreprocessor"], 'use_short_name': False},
@@ -67,16 +80,7 @@ def get_muss_preprocessors(model_name):
             'target_ratio': TOKENS_RATIO["ReplaceOnlyLevenshteinPreprocessor"],
             'use_short_name': False,
         },
-        'WordRankRatioPreprocessor': {
-            'target_ratio': TOKENS_RATIO["WordRankRatioPreprocessor"],
-            'language': language,
-            'use_short_name': False,
-        },
-        'DependencyTreeDepthRatioPreprocessor': {
-            'target_ratio': TOKENS_RATIO["DependencyTreeDepthRatioPreprocessor"],
-            'language': language,
-            'use_short_name': False,
-        },
+        'FKGLPreprocessor': {'target_score': TOKENS_RATIO["FKGLPreprocessor"], "use_short_name": False},
     }
     if is_model_using_mbart(model_name):
         preprocessors_kwargs['SentencePiecePreprocessor'] = {
